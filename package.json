@@ -1,0 +1,31 @@
+{
+  "name": "offline-caching",
+  "version": "1.0.0",
+  "description": "",
+  "main": "public/scripts/index.js",
+  "scripts": {
+    "start": "node server.js",
+    "compile": "browserify src/scripts/main.js -t babelify --outfile public/scripts/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lwiacek-magari/offline-caching.git"
+  },
+  "author": "Lukasz Wiacek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lwiacek-magari/offline-caching/issues"
+  },
+  "dependencies": {
+    "body-parser": "^1.4.3",
+    "express": "^4.4.5"
+    },
+  "devDependencies": {
+    "babel": "*",
+    "npm-watch": "*",
+    "browserify": "*",
+    "babelify": "*"
+  },
+  "homepage": "https://github.com/lwiacek-magari/offline-caching"
+}
