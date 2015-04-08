@@ -83,7 +83,78 @@ if (!CacheStorage.prototype.match) {
 }
 
 
+var CACHE_NAME = 'my-site-cache-v5';
 
+// The files we want to cache
+var urlsToCache = [
+  '/off/',
+  '/off/styles/main.css',
+  '/off/script/main.js'
+];
+
+// Set the callback for the install step
+self.addEventListener('install', function(event) {
+  // Perform install steps
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      console.log('Opened cache');
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      // Cache hit - return response
+      if (response) {
+        return response;
+      }
+
+      // IMPORTANT: Clone the request. A request is a stream and
+      // can only be consumed once. Since we are consuming this
+      // once by cache and once by the browser for fetch, we need
+      // to clone the response
+      var fetchRequest = event.request.clone();
+
+      return fetch(fetchRequest).then(function(response) {
+        // Check if we received a valid response
+        if(!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+
+        // IMPORTANT: Clone the response. A response is a stream
+        // and because we want the browser to consume the response
+        // as well as the cache consuming the response, we need
+        // to clone it so we have 2 stream.
+        var responseToCache = response.clone();
+
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(event.request, responseToCache);
+        });
+
+        return response;
+      });
+    })
+  );
+});
+
+self.addEventListener('activate', function(event) {
+
+  var cacheWhitelist = ['pages-cache-v4'];
+
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
 
 // var CACHE_VERSION = 1;
 
@@ -144,27 +215,27 @@ if (!CacheStorage.prototype.match) {
 
 
 
-this.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open('myasdfsiasaaaadfte-static-v18ddddddddasdfd').then(function(cache) {
+// this.addEventListener('install', function(event) {
+//   event.waitUntil(
+//     caches.open('myasdfsiasaaaadfte-static-v18ddddddddasdfd').then(function(cache) {
 
-      return cache.put('/off/', new Response('From the cache!..'));
-      // return cache.addAll(
-      //   '/off/'
-      // ).then(function() {
-      //   new Response('From the cache!!!'));
-      // });
-    });
-  );
-});
+//       return cache.put('/off/', new Response('From the cache!..'));
+//       // return cache.addAll(
+//       //   '/off/'
+//       // ).then(function() {
+//       //   new Response('From the cache!!!'));
+//       // });
+//     });
+//   );
+// });
 
-this.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || new Response("Nothing in the cache for this request");
-    })
-  );
-});
+// this.addEventListener('fetch', function(event) {
+//   event.respondWith(
+//     caches.match(event.request).then(function(response) {
+//       return response || new Response("Nothing in the cache for this request");
+//     })
+//   );
+// });
 
 
 // this.addEventListener('activate', function(event) {
